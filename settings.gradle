@@ -1,0 +1,14 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.minecraftforge.net/' }
+    }
+}
+
+rootProject.name = 'torture-mod'
+
+include 'api', 'kernel', 'bundle', 'storage-sqlite', 'testkit'
+include 'feature-captivity', 'feature-torture', 'feature-resistance', 'feature-escape',
+        'feature-interrogation', 'feature-convoy', 'feature-offline', 'feature-items', 'feature-admin',
+        'feature-help', 'feature-resourcepack', 'feature-cuffs', 'feature-prison', 'feature-minions'
+include 'platform-forge-1.20.1'

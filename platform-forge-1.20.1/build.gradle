@@ -1,0 +1,89 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '6.0.54'
+}
+
+base.archivesName = 'torturemod-forge-1.20.1'
+
+def bundledModules = rootProject.subprojects
+        .findAll { it.name.startsWith('feature-') || it.name in ['api', 'kernel', 'bundle', 'storage-sqlite'] }
+        .collect { it.path }
+
+bundledModules.each { evaluationDependsOn(it) }
+
+jarJar.enable()
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            // Русский текст в консоли Windows без кракозябр.
+            jvmArgs '-Dsun.stdout.encoding=UTF-8', '-Dsun.stderr.encoding=UTF-8'
+            mods {
+                torturemod {
+                    source sourceSets.main
+                    bundledModules.each { source project(it).sourceSets.main }
+                }
+            }
+        }
+        server {
+            args '--nogui'
+        }
+    }
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.28'
+
+    bundledModules.each { implementation project(it) }
+
+    // Библиотеки для запуска из среды разработки.
+    minecraftLibrary 'org.yaml:snakeyaml:2.7'
+    minecraftLibrary 'org.xerial:sqlite-jdbc:3.54.1.0'
+
+    // Библиотеки внутри готового мода. Слой SLF4J берётся из игры.
+    jarJar(group: 'org.yaml', name: 'snakeyaml', version: '[2.0,3.0)') {
+        jarJar.pin(it, '2.7')
+        transitive = false
+    }
+    jarJar(group: 'org.xerial', name: 'sqlite-jdbc', version: '[3.45,4.0)') {
+        jarJar.pin(it, '3.54.1.0')
+        transitive = false
+    }
+}
+
+// Модули без классов игры вливаются в jar мода: перемаппинг их не затрагивает.
+['jar', 'jarJar'].each { taskName ->
+    tasks.named(taskName) {
+        bundledModules.each { from project(it).sourceSets.main.output }
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        manifest.attributes(
+                'Implementation-Title': 'Torture Mod',
+                'Implementation-Version': project.version
+        )
+    }
+}
+
+tasks.named('jar') {
+    archiveClassifier = 'slim'
+}
+
+tasks.named('jarJar') {
+    archiveClassifier = ''
+    finalizedBy 'reobfJarJar'
+}
+
+reobf {
+    jarJar {}
+}
+
+// Консоль тестового сервера: команды можно вводить в терминале.
+tasks.matching { it.name == 'runServer' }.configureEach {
+    standardInput = System.in
+}
+
+tasks.named('assemble') {
+    dependsOn 'jarJar'
+}

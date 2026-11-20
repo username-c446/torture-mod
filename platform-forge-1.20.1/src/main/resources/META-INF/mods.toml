@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="torturemod"
+version="${file.jarVersion}"
+displayName="Torture Mod"
+# Мод только для сервера: клиенту не нужно его устанавливать.
+displayTest="IGNORE_SERVER_VERSION"
+description='''Плен и пытки над игроками и мобами на стороне сервера.'''
+
+[[dependencies.torturemod]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="SERVER"
+
+[[dependencies.torturemod]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="SERVER"

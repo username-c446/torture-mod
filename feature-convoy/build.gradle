@@ -1,0 +1,4 @@
+// Тестам нужна фича плена, от сервиса которой зависит эта.
+dependencies {
+    testImplementation project(':feature-captivity')
+}

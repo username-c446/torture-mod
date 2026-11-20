@@ -1,0 +1,7 @@
+// Тестам нужны фичи, от сервисов которых зависит эта.
+dependencies {
+    testImplementation project(':feature-captivity')
+    testImplementation project(':feature-items')
+    testImplementation project(':feature-resistance')
+    testImplementation project(':feature-torture')
+}

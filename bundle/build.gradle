@@ -1,0 +1,8 @@
+// Единственное место, которое знает полный состав мода. Платформы вызывают только его.
+dependencies {
+    api project(':kernel')
+    implementation project(':storage-sqlite')
+    rootProject.subprojects.findAll { it.name.startsWith('feature-') }.each {
+        implementation project(it.path)
+    }
+}

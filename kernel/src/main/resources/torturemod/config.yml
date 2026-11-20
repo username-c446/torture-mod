@@ -1,0 +1,242 @@
+# Язык текстов: ru или en. Сами тексты лежат в папке lang рядом с этим файлом.
+language: ru
+
+captivity:
+  capture:
+    # Предметы, которыми берут в плен в клетке: применить к цели или к маркеру клетки.
+    items: [minecraft:lead]
+    # Тратить ли предмет при захвате.
+    consume_item: true
+  cell:
+    # Блоки, из которых можно строить стены клетки.
+    walls:
+      - minecraft:iron_bars
+      - minecraft:iron_door
+      - minecraft:iron_trapdoor
+      - minecraft:stone_bricks
+      - minecraft:mossy_stone_bricks
+      - minecraft:cracked_stone_bricks
+      - minecraft:chiseled_stone_bricks
+      - minecraft:cobblestone
+      - minecraft:mossy_cobblestone
+      - minecraft:obsidian
+    # Хотя бы один такой блок должен быть в стенах или внутри клетки.
+    markers: [minecraft:lodestone]
+    # Наибольший внутренний объём клетки в блоках.
+    max_volume: 512
+    # Как часто проверять, цела ли клетка, в тиках (20 тиков = 1 секунда).
+    check_interval_ticks: 100
+  # Как часто проверять, что пленные внутри клеток, в тиках.
+  position_check_interval_ticks: 20
+  # Сколько секунд освобождённого нельзя снова взять в плен. На команду администратора не действует.
+  recapture_immunity_seconds: 300
+  # Мобы, которых нельзя взять в плен.
+  blacklist:
+    - minecraft:ender_dragon
+    - minecraft:wither
+    - minecraft:warden
+    - minecraft:elder_guardian
+  restrictions:
+    # Пленного слышат только игроки в этом радиусе.
+    local_chat_radius: 16
+    # Команды, доступные пленному игроку.
+    allowed_commands: []
+
+items:
+  # Правила поверх автоопределения. match: ID предмета, #тег или @мод.
+  # Точное правило побеждает: предмет, затем тег, затем мод.
+  # types: типы пыток (strike, fire, drown, poison); strength: множитель силы; disabled: предмет не участвует.
+  # Пример:
+  #   - match: "minecraft:blaze_rod"
+  #     types: [fire, strike]
+  #     strength: 1.5
+  #   - match: "@somemod"
+  #     disabled: true
+  rules: []
+  # Искать тип по словам в ID (knife, torch...), если другие признаки ничего не дали.
+  name_fallback: true
+
+resistance:
+  # Полная шкала игрока. Мобы берут её же, если в профиле не задано иное.
+  max: 100
+  recovery:
+    # Восстановление начинается через столько секунд после последней пытки и идёт, только пока пленный в сети.
+    delay_seconds: 60
+    full_recovery_minutes: 60
+  habituation:
+    # Каждое применение одного типа умножает его действенность на decay, но не ниже minimum.
+    decay: 0.85
+    minimum: 0.2
+    # На сколько действенность восстанавливается за секунду без этого типа.
+    recovery_per_second: 0.01
+  # Профили мобов: max и vulnerability.<тип> (1 — обычная, 0 — неуязвим).
+  # Без профиля уязвимость определяет игра: огнестойкий не горит, нежить не травится.
+  mobs:
+    minecraft:villager:
+      max: 60
+
+torture:
+  # Сколько секунд шкала видна после последнего действия.
+  bar_seconds: 10
+  types:
+    strike:
+      cooldown_seconds: 3
+      resistance_drop: 0.25
+      # Урон здоровью при силе 1. Пытка может убить: смерть снимает плен.
+      health_damage: 1.0
+      sound: minecraft:entity.player.attack.strong
+      particle: minecraft:damage_indicator
+      icon: minecraft:iron_sword
+    fire:
+      cooldown_seconds: 10
+      resistance_drop: 0.4
+      fire_ticks: 60
+      sound: minecraft:item.flintandsteel.use
+      particle: minecraft:flame
+      icon: minecraft:flint_and_steel
+    drown:
+      cooldown_seconds: 15
+      resistance_drop: 0.5
+      air_ticks: 150
+      sound: minecraft:entity.player.splash
+      particle: minecraft:splash
+      icon: minecraft:water_bucket
+    poison:
+      cooldown_seconds: 15
+      resistance_drop: 0.5
+      poison_ticks: 100
+      hunger_points: 2
+      sound: minecraft:entity.witch.drink
+      particle: minecraft:witch
+      icon: minecraft:spider_eye
+
+offline:
+  # Наказания за выход из игры в плену. Каждое можно выключить.
+  penalties:
+    # На месте вышедшего остаётся тело: его можно пытать и убить, вещи при смерти выпадают.
+    body: true
+    resistance_loss: true
+    break_on_repeat: true
+  # Сколько процентов шкалы снимает каждый выход.
+  resistance_loss_percent: 10
+  # После стольких выходов за один плен пленный сразу сломлен.
+  break_after_exits: 5
+  # Возвращать тела пленных не в сети после перезапуска сервера.
+  restore_bodies_after_restart: true
+
+interrogation:
+  # Источник сведений открывается, когда сопротивление опустилось до порога (в процентах).
+  # 0 — только после слома.
+  sources:
+    allies:
+      threshold_percent: 50
+    coordinates:
+      threshold_percent: 25
+    inventory:
+      threshold_percent: 0
+    ender_chest:
+      threshold_percent: 0
+  allies:
+    # Игроки, которые часто бывали рядом с пленным до плена.
+    radius: 32
+    sample_seconds: 30
+    # Сколько отметок рядом нужно, чтобы считаться союзником (10 отметок по 30 секунд — 5 минут).
+    min_samples: 10
+    window_hours: 3
+    max_listed: 5
+
+escape:
+  # Как часто пленный пытается вырваться, в секундах. После неудачи интервал умножается на failure_multiplier.
+  attempt_interval_seconds: 180
+  failure_multiplier: 2
+  # Шанс побега при полной шкале; с падением сопротивления он падает. Сломленный сам не сбегает.
+  max_chance_percent: 25
+  # Серия прыжков и приседаний, которую пленный игрок должен повторить, и время на неё.
+  sequence_length: 3
+  sequence_seconds: 8
+  rescue:
+    # Чем помощник освобождает пленного: ПКМ по пленному раз за разом, стоя рядом.
+    items: [minecraft:shears]
+    seconds: 5
+    # Пауза между нажатиями дольше этой прерывает освобождение.
+    click_gap_seconds: 1.5
+    max_distance: 4
+
+convoy:
+  # ПКМ этим предметом по пленному берёт его на поводок и отпускает.
+  leash_items: [minecraft:lead]
+  # Поводок тянет пленного, когда тот дальше этого расстояния, и рвётся дальше break_distance.
+  slack_distance: 3
+  break_distance: 10
+  pull_strength: 0.15
+  # Сколько секунд даётся, чтобы вернуть пленного в клетку после отпущенного или оборванного поводка.
+  return_seconds: 60
+
+cuffs:
+  # Наручники: ПКМ этим предметом по пленному раз за разом, стоя рядом. torturemod:handcuffs — цепь с меткой мода,
+  # крафт на верстаке: цепь, железный слиток, цепь в ряд.
+  items: [torturemod:handcuffs]
+  # Надевать при захвате сразу: так прежние ограничения пленного сохраняются.
+  on_capture: true
+  seconds: 3
+  # Сломленного или ведомого на поводке заковать быстрее: время умножается на это число.
+  helpless_factor: 0.5
+  # Сколько секунд помощник перекусывает наручники ножницами (escape.rescue.items).
+  cut_seconds: 5
+  click_gap_seconds: 1.5
+  max_distance: 4
+  # Номер модели наручников в ресурспаке (CustomModelData у цепи).
+  custom_model_data: 740001
+
+resource_pack:
+  # Мод собирает ресурспак в config/torturemod/resourcepack.zip и пишет его SHA-1 в лог.
+  # Ссылка, по которой игроки скачивают пак: если задана, мод сам предлагает его при входе.
+  # Пусто — пак раздаёт кто-то другой: resource-pack в server.properties или плагин вроде ForcePack.
+  url: ""
+  required: false
+  # Куда ещё скопировать собранный пак: папка веб-сервера или плагина ForcePack на прокси.
+  copy_to: []
+
+prison:
+  # Предмет разметки: ЛКМ и ПКМ по блокам — углы, Shift+ПКМ в воздух — подтвердить, Shift+ЛКМ — сбросить.
+  marker_item: minecraft:stick
+  # Shift+ПКМ предметом разметки по такому блоку в тюрьме делает его пультом.
+  console_blocks: [minecraft:lectern]
+  # Блоки, которым можно дать роль: сдача, награды, выкуп, склад.
+  chest_blocks: [minecraft:chest, minecraft:trapped_chest, minecraft:barrel]
+  max_prisons_per_player: 3
+  min_side: 3
+  max_side: 128
+  max_zones: 16
+  # На каком расстоянии охранник замечает беглеца (если между ними нет стен).
+  alarm_distance: 24
+  # Игровой день нормы: минуты онлайн пленного.
+  day_minutes: 20
+  quota:
+    max_kinds: 9
+    max_count: 1024
+  # Через сколько часов без ответа сделка выкупа отклоняется и залог можно забрать.
+  deal_expiry_hours: 24
+  # Сколько действует ускоренное восстановление в награду за норму.
+  reward_recovery_minutes: 20
+  max_sentence_minutes: 10080
+  # Роли из мода приватов → роли тюрьмы: owner, coowner, warden или ID своей роли.
+  ownership_roles: ["mayor=owner", "assistant=coowner"]
+
+minions:
+  # Чем подчиняют сломленного моба в своей тюрьме. Сломленным големам он не нужен.
+  control_item: minecraft:ender_eye
+  golem_types: [minecraft:iron_golem, minecraft:snow_golem]
+  # Охранник атакует беглецов и пособников в этом радиусе, на посту — не дальше post_margin от тюрьмы.
+  guard_range: 16
+  post_margin: 16
+  patrol_radius: 5
+  chase_escapee_seconds: 120
+  chase_helper_seconds: 60
+  # Что фермер относит в сундук: ID=сколько оставить себе для посадки.
+  farmer_items: ["minecraft:wheat=0", "minecraft:beetroot=0", "minecraft:potato=16", "minecraft:carrot=16"]
+  farmer_batch: 16
+
+help:
+  # Подсказки по месту при первом действии.
+  hints: true

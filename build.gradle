@@ -1,0 +1,33 @@
+subprojects {
+    group = 'com.torturemod'
+    version = mod_version
+
+    apply plugin: 'java-library'
+
+    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+    repositories {
+        mavenCentral()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
+}
+
+// Фичи видят только api: ни других фич, ни kernel, ни классов игры.
+// Тесты фич работают на поддельной платформе из testkit.
+configure(subprojects.findAll { it.name.startsWith('feature-') }) {
+    dependencies {
+        implementation project(':api')
+
+        testImplementation project(':testkit')
+        testImplementation platform('org.junit:junit-bom:5.14.4')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+}

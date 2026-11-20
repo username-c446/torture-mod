@@ -1,0 +1,8 @@
+{
+  "name": "torturemod-bot",
+  "private": true,
+  "description": "Ванильные клиенты на mineflayer для проверки мода с точки зрения игрока.",
+  "dependencies": {
+    "mineflayer": "4.39.0"
+  }
+}
